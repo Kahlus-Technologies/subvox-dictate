@@ -21,3 +21,7 @@ node_modules/
 
 # Claude
 .claude/
+
+# Subvox Dictate
+/dist/
+/build/

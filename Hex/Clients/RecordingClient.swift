@@ -960,7 +960,8 @@ actor RecordingClientLive {
   }
 
   private func resolvePreferredInputDevice() -> AudioDeviceID? {
-    guard let selectedMicrophoneID = hexSettings.selectedMicrophoneID else { return nil }
+    // Subvox: no explicit choice -> built-in mic, so AirPods stay in high-quality (A2DP) mode and keep streaming motion.
+    guard let selectedMicrophoneID = hexSettings.selectedMicrophoneID else { return SubvoxCapture.builtInMicrophone() }
     if let deviceID = getDeviceID(uid: selectedMicrophoneID),
        deviceHasInput(deviceID: deviceID) {
       return deviceID

@@ -1,3 +1,5 @@
+> **This is Subvox Dictate**, a Kahlus fork of the legacy Swift Hex that also records AirPods motion for silent-speech research. See [SUBVOX.md](SUBVOX.md).
+
 # Hex Has Moved
 
 Hex has moved to **[anomalyco/hex](https://github.com/anomalyco/hex)**. This Swift app is no longer maintained.

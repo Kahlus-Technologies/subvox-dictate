@@ -221,8 +221,8 @@ final class SuperFastCaptureController {
     }
 
     inputNode.installTap(onBus: 0, bufferSize: SuperFastCaptureConstants.tapBufferSize, format: inputFormat) {
-      [weak self] buffer, _ in
-      self?.enqueue(buffer, generation: generation)
+      [weak self] buffer, when in
+      self?.enqueue(buffer, when: when, generation: generation)
     }
 
     engine.prepare()
@@ -369,14 +369,14 @@ final class SuperFastCaptureController {
     }
   }
 
-  private func enqueue(_ buffer: AVAudioPCMBuffer, generation: Int) {
+  private func enqueue(_ buffer: AVAudioPCMBuffer, when: AVAudioTime, generation: Int) {
     guard let copy = clone(buffer) else { return }
     processingQueue.async { [weak self] in
-      self?.process(copy, generation: generation)
+      self?.process(copy, when: when, generation: generation)
     }
   }
 
-  private func process(_ buffer: AVAudioPCMBuffer, generation: Int) {
+  private func process(_ buffer: AVAudioPCMBuffer, when: AVAudioTime, generation: Int) {
     guard Self.shouldProcessCallback(callbackGeneration: generation, currentGeneration: captureGeneration) else {
       return
     }
@@ -409,6 +409,13 @@ final class SuperFastCaptureController {
       logger.notice(
         "Capture engine first buffer latency=\(String(format: "%.3f", timeToFirstBuffer))s prepended=\(String(format: "%.3f", recording.prependedDuration))s frames=\(sampleCount)"
       )
+      // Subvox: host time of the file's first sample = this buffer's capture time minus the pre-roll ahead of it.
+      if when.isHostTimeValid {
+        SubvoxCapture.shared.noteAudioStart(
+          recording.url,
+          hostSeconds: AVAudioTime.seconds(forHostTime: when.hostTime) - recording.prependedDuration
+        )
+      }
       recording.didLogFirstBuffer = true
       activeRecording = recording
     }

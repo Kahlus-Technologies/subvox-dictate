@@ -8,6 +8,8 @@ actor ParakeetClient {
   private var asr: AsrManager?
   private var models: AsrModels?
   private var currentVariant: ParakeetModel?
+  /// Subvox: word timings from the most recent transcription, seconds from the clip start.
+  private(set) var lastWords: [SubvoxCapture.Word] = []
   private let logger = HexLog.parakeet
   private let vendorDirs = [
     // Our app-specific cache path convention (under XDG or com.kitlangton.Hex/cache)
@@ -127,6 +129,9 @@ actor ParakeetClient {
     var decoderState = TdtDecoderState.make(decoderLayers: await asr.decoderLayerCount)
     let result = try await asr.transcribe(url, decoderState: &decoderState)
     logger.info("Parakeet transcription finished in \(String(format: "%.2f", Date().timeIntervalSince(t0)))s")
+    lastWords = buildWordTimings(from: result.tokenTimings ?? []).map {
+      SubvoxCapture.Word(text: $0.word, start: $0.startTime, end: $0.endTime)
+    }
     return result.text
   }
 

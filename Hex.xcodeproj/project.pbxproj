@@ -322,7 +322,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hex Debug.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Hex Debug";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Subvox Dictate Debug.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Subvox Dictate Debug";
 			};
 			name = Debug;
 		};
@@ -339,7 +339,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hex.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Hex";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Subvox Dictate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Subvox Dictate";
 			};
 			name = Release;
 		};
@@ -482,7 +482,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Hex/Preview Content\"";
 				DEVELOPMENT_TEAM = QC99C9JE59;
 				EMIT_FRONTEND_COMMAND_LINES = YES;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
@@ -498,7 +498,8 @@
 				INFOPLIST_FILE = Hex/Info.plist;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Hex needs to control keyboard events to simulate paste operations.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Hex needs microphone access in order to transcribe your voice.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Subvox Dictate needs microphone access in order to transcribe your voice.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Subvox Dictate records AirPods head motion during each dictation to build a silent-speech dataset.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -509,9 +510,9 @@
 					"-Xlinker",
 					"-interposable",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.kitlangton.Hex.debug;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kahlus.subvox.dictate.debug;
 				PRODUCT_MODULE_NAME = Hex;
-				PRODUCT_NAME = "Hex Debug";
+				PRODUCT_NAME = "Subvox Dictate Debug";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
 				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
@@ -538,7 +539,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Hex/Preview Content\"";
 				DEVELOPMENT_TEAM = QC99C9JE59;
 				EMIT_FRONTEND_COMMAND_LINES = NO;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
@@ -553,15 +554,16 @@
 				INFOPLIST_FILE = Hex/Info.plist;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Hex needs to control keyboard events to simulate paste operations.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Hex needs microphone access in order to transcribe your voice.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Subvox Dictate needs microphone access in order to transcribe your voice.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Subvox Dictate records AirPods head motion during each dictation to build a silent-speech dataset.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.8.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kitlangton.Hex;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.kahlus.subvox.dictate;
+				PRODUCT_NAME = "Subvox Dictate";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
 				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;

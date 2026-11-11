@@ -542,6 +542,11 @@ private extension TranscriptionFeature {
   ) async throws {
     @Shared(.hexSettings) var hexSettings: HexSettings
 
+    // Subvox: keep this dictation as a labelled motion session (raw model words, before paste formatting).
+    SubvoxCapture.shared.saveSession(
+      audioURL: audioURL, text: result, model: hexSettings.selectedModel, sourceApp: sourceAppName
+    )
+
     if hexSettings.saveTranscriptionHistory {
       let transcript = try await transcriptPersistence.save(
         result,

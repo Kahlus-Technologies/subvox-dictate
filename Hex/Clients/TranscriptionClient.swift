@@ -239,6 +239,8 @@ actor TranscriptionClientLive {
       defer { preparedClip.cleanup() }
       let startTx = Date()
       let text = try await parakeet.transcribe(preparedClip.url)
+      // Padding only appends silence, so the timings hold for the original clip.
+      SubvoxCapture.shared.noteWords(url, await parakeet.lastWords)
       transcriptionLogger.info("Parakeet transcription took \(String(format: "%.2f", Date().timeIntervalSince(startTx)))s")
       transcriptionLogger.info("Parakeet request total elapsed \(String(format: "%.2f", Date().timeIntervalSince(startAll)))s")
       return text
@@ -269,7 +271,12 @@ actor TranscriptionClientLive {
     // Perform the transcription.
     transcriptionLogger.notice("Transcribing with WhisperKit model=\(model) file=\(url.lastPathComponent)")
     let startTx = Date()
+    var options = options
+    options.wordTimestamps = true  // Subvox: word timings for the motion labels
     let results = try await whisperKit.transcribe(audioPath: url.path, decodeOptions: options)
+    SubvoxCapture.shared.noteWords(url, results.flatMap(\.allWords).map {
+      SubvoxCapture.Word(text: $0.word.trimmingCharacters(in: .whitespaces), start: Double($0.start), end: Double($0.end))
+    })
     transcriptionLogger.info("WhisperKit transcription took \(String(format: "%.2f", Date().timeIntervalSince(startTx)))s")
     transcriptionLogger.info("WhisperKit request total elapsed \(String(format: "%.2f", Date().timeIntervalSince(startAll)))s")
 

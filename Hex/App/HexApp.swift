@@ -20,8 +20,11 @@ struct HexApp: App {
                 appDelegate.presentSettingsView()
             }.keyboardShortcut(",")
 
-            CheckForUpdatesView()
-			
+            Button("Open Subvox Sessions Folder") {
+                try? FileManager.default.createDirectory(at: SubvoxCapture.root, withIntermediateDirectories: true)
+                NSWorkspace.shared.open(SubvoxCapture.root)
+            }
+
 			Divider()
 			
 			Button("Quit Hex") {
@@ -41,8 +44,6 @@ struct HexApp: App {
 		}
 		.commands {
 			CommandGroup(after: .appInfo) {
-				CheckForUpdatesView()
-
 				Button("Settings…") {
 					appDelegate.presentSettingsView()
 				}.keyboardShortcut(",")

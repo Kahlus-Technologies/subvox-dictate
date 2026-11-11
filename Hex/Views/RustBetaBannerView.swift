@@ -3,7 +3,8 @@ import SwiftUI
 
 enum RustBetaAnnouncement {
 	static let downloadURL = URL(string: "https://hex.kitlangton.com")!
-	static let isAvailable: Bool = {
+	static let isAvailable: Bool = false  // Subvox Dictate: the Rust Hex has no motion capture, don't advertise it
+	static let isAvailableUpstream: Bool = {
 		var appleSilicon: Int32 = 0
 		var size = MemoryLayout<Int32>.size
 		let supported = sysctlbyname("hw.optional.arm64", &appleSilicon, &size, nil, 0) == 0

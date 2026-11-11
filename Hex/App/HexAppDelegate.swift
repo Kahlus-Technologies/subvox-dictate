@@ -23,6 +23,27 @@ class HexAppDelegate: NSObject, NSApplicationDelegate {
 			appLogger.debug("Running in testing mode")
 			return
 		}
+		SubvoxCapture.shared.start()
+		#if DEBUG
+		// Test hook (debug builds only): drive dictation without the hotkey, e.g. from a script:
+		// `swift -e 'import Foundation; DistributedNotificationCenter.default().postNotificationName(.init("com.kahlus.subvox.dictate.test"), object: "start", userInfo: nil, deliverImmediately: true)'`
+		DistributedNotificationCenter.default().addObserver(forName: .init("com.kahlus.subvox.dictate.test"), object: nil, queue: .main) { note in
+			let command = note.object as? String
+			Task { @MainActor in
+				switch command {
+				case "start": HexApp.appStore.send(.transcription(.startRecording))
+				case "stop": HexApp.appStore.send(.transcription(.stopRecording))
+				case let c? where c.hasPrefix("record:"):  // record:<seconds>, timed in-app (notification delivery to a background app can lag)
+					HexApp.appStore.send(.transcription(.startRecording))
+					try? await Task.sleep(for: .seconds(Double(c.dropFirst(7)) ?? 5))
+					HexApp.appStore.send(.transcription(.stopRecording))
+				case "fetch": HexApp.appStore.send(.settings(.modelDownload(.fetchModels)))
+				case "download": HexApp.appStore.send(.settings(.modelDownload(.downloadModel(HexApp.appStore.hexSettings.selectedModel))))
+				default: break
+				}
+			}
+		}
+		#endif
 
 		Task {
 			await soundEffect.preloadSounds()
