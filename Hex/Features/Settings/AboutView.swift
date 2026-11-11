@@ -16,11 +16,7 @@ struct AboutView: View {
                     Label("Version", systemImage: "info.circle")
                     Spacer()
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")
-                    Button("Check for Updates") {
-                        viewModel.checkForUpdates()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(!viewModel.canCheckForUpdates)
+                    Link("Releases", destination: URL(string: "https://github.com/Kahlus-Technologies/subvox-dictate/releases")!)
                 }
                 HStack {
                     Label("Changelog", systemImage: "doc.text")
@@ -36,23 +32,14 @@ struct AboutView: View {
                     }
                 }
                 HStack {
-                    Label("Hex is open source", systemImage: "apple.terminal.on.rectangle")
+                    Label("Subvox Dictate is open source", systemImage: "apple.terminal.on.rectangle")
                     Spacer()
-                    Link("Visit our GitHub", destination: URL(string: "https://github.com/kitlangton/Hex/")!)
+                    Link("Visit our GitHub", destination: URL(string: "https://github.com/Kahlus-Technologies/subvox-dictate")!)
                 }
-
-                if RustBetaAnnouncement.isAvailable {
-                    HStack {
-                        Label("New Rust beta", systemImage: "hexagon")
-                        Spacer()
-                        Link("Try the beta", destination: RustBetaAnnouncement.downloadURL)
-                    }
-                }
-                
                 HStack {
-                    Label("Support the developer", systemImage: "heart")
+                    Label("Built on Hex by Kit Langton (MIT)", systemImage: "heart")
                     Spacer()
-                    Link("Become a Sponsor", destination: URL(string: "https://github.com/sponsors/kitlangton")!)
+                    Link("Hex on GitHub", destination: URL(string: "https://github.com/kitlangton/Hex")!)
                 }
             }
         }

@@ -27,11 +27,11 @@ struct HexApp: App {
 
 			Divider()
 			
-			Button("Quit Hex") {
+			Button("Quit Subvox Dictate") {
 				NSApplication.shared.terminate(nil)
 			}.keyboardShortcut("q")
 		} label: {
-			if let image = NSImage(named: "HexIcon").map({
+			if let image = NSImage(named: "SubvoxIcon").map({
 				let ratio = $0.size.height / $0.size.width
 				$0.size.height = 18
 				$0.size.width = 18 / ratio

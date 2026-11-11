@@ -302,7 +302,7 @@ private extension TranscriptionFeature {
         soundEffect.play(.startRecording)
 
         if preventSleep {
-          await sleepManagement.preventSleep(reason: "Hex Voice Recording")
+          await sleepManagement.preventSleep(reason: "Subvox Dictate Voice Recording")
         }
         guard !Task.isCancelled else {
           if preventSleep {
