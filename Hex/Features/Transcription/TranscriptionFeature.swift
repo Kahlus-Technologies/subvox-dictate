@@ -546,6 +546,7 @@ private extension TranscriptionFeature {
     SubvoxCapture.shared.saveSession(
       audioURL: audioURL, text: result, model: hexSettings.selectedModel, sourceApp: sourceAppName
     )
+    await SubvoxSharing.shared.uploadPending()  // no-op unless the user opted in
 
     if hexSettings.saveTranscriptionHistory {
       let transcript = try await transcriptPersistence.save(

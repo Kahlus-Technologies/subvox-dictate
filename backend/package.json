@@ -1,0 +1,6 @@
+{
+  "name": "subvox-dictate-backend",
+  "private": true,
+  "type": "module",
+  "dependencies": { "convex": "^1.49.0" }
+}

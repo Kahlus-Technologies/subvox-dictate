@@ -24,6 +24,7 @@ class HexAppDelegate: NSObject, NSApplicationDelegate {
 			return
 		}
 		SubvoxCapture.shared.start()
+		SubvoxSharing.shared.uploadPending()  // retry anything a previous run didn't finish
 		#if DEBUG
 		// Test hook (debug builds only): drive dictation without the hotkey, e.g. from a script:
 		// `swift -e 'import Foundation; DistributedNotificationCenter.default().postNotificationName(.init("com.kahlus.subvox.dictate.test"), object: "start", userInfo: nil, deliverImmediately: true)'`
@@ -38,6 +39,7 @@ class HexAppDelegate: NSObject, NSApplicationDelegate {
 					try? await Task.sleep(for: .seconds(Double(c.dropFirst(7)) ?? 5))
 					HexApp.appStore.send(.transcription(.stopRecording))
 				case "fetch": HexApp.appStore.send(.settings(.modelDownload(.fetchModels)))
+				case "share": SubvoxSharing.shared.enabled = true
 				case "download": HexApp.appStore.send(.settings(.modelDownload(.downloadModel(HexApp.appStore.hexSettings.selectedModel))))
 				default: break
 				}

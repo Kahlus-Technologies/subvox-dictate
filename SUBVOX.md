@@ -5,7 +5,7 @@ dictation also saves the AirPods head and jaw motion recorded while you spoke, w
 timestamped. Everyday dictation turns into training data for
 [Subvox](https://github.com/Kahlus-Technologies/subvox), our silent-speech decoder.
 
-Fork of [Hex](https://github.com/kitlangton/Hex) (MIT) by Kit Langton. Transcription runs on your
+Uses the Subvox icon. Fork of [Hex](https://github.com/kitlangton/Hex) (MIT) by Kit Langton. Transcription runs on your
 Mac (Parakeet or Whisper). Nothing leaves your machine.
 
 ## Install
@@ -39,6 +39,13 @@ Check that sessions are usable (AirPods connected, motion covers the audio):
 
 **Privacy:** every dictation's audio and text is kept on disk. Delete any session folder you don't
 want to keep.
+
+## Sharing (opt in)
+
+Settings > **Help build silent speech** uploads each dictation's motion, transcript, and word timings to
+our research backend (Convex, see `backend/`). Off by default. Audio is uploaded only with **Include
+audio** on. No account: a random ID on your Mac groups your sessions. **Delete my shared data** erases
+everything uploaded from your Mac. Failed uploads retry on the next dictation or launch.
 
 ## Tips for useful data
 
