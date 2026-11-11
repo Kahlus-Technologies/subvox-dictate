@@ -10,7 +10,8 @@ public extension URL {
 				appropriateFor: nil,
 				create: true
 			)
-			let hexDirectory = appSupport.appendingPathComponent("com.kitlangton.Hex", isDirectory: true)
+			// Subvox Dictate: own folder, so settings and history never mix with an installed stock Hex.
+			let hexDirectory = appSupport.appendingPathComponent("com.kahlus.subvox.dictate", isDirectory: true)
 			try fm.createDirectory(at: hexDirectory, withIntermediateDirectories: true)
 			return hexDirectory
 		}

@@ -12,22 +12,25 @@ import os.log
 /// motion.csv `t` and words.json start/end share one clock: seconds since the first audio sample.
 final class SubvoxCapture: @unchecked Sendable {
   static let shared = SubvoxCapture()
-  static let root = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+  static var root = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     .appending(path: "Subvox/Sessions", directoryHint: .isDirectory)
 
   struct Word: Codable { let text: String; let start: Double; let end: Double }
+  /// One motion reading: host-clock time plus the 16 motion.csv columns after `t`.
+  struct Sample { let t: TimeInterval; let values: [Double] }
 
   private let log = Logger(subsystem: "com.kahlus.subvox.dictate", category: "Subvox")
   private let lock = NSLock()
   private let manager = CMHeadphoneMotionManager()
   private let queue = OperationQueue()
-  private var samples: [CMDeviceMotion] = []  // ponytail: 2 min array ring, trimmed in bulk; fine at 50 Hz
+  private var samples: [Sample] = []  // ponytail: 2 min array ring, trimmed in bulk; fine at 50 Hz
   private var audioStart: [URL: TimeInterval] = [:]  // capture file -> host seconds of its first sample
   private var words: [URL: [Word]] = [:]
   private(set) var sessionsSaved = 0
   private(set) var lastSampleUptime: TimeInterval = 0
 
   var motionStreaming: Bool { ProcessInfo.processInfo.systemUptime - lastSampleUptime < 2 }
+  var bufferedSamples: Int { lock.withLock { samples.count } }
 
   func start() {
     guard manager.isDeviceMotionAvailable else { return log.error("Headphone motion unavailable") }
@@ -38,12 +41,26 @@ final class SubvoxCapture: @unchecked Sendable {
         return
       }
       lock.withLock {
-        self.samples.append(motion)
-        self.lastSampleUptime = motion.timestamp
-        if self.samples.count > 7_000 { self.samples.removeFirst(self.samples.count - 6_000) }
+        self.append(Self.sample(motion))
       }
     }
     log.notice("Headphone motion started")
+  }
+
+  static func sample(_ m: CMDeviceMotion) -> Sample {
+    let q = m.attitude.quaternion
+    return Sample(t: m.timestamp, values: [
+      m.userAcceleration.x, m.userAcceleration.y, m.userAcceleration.z,
+      m.rotationRate.x, m.rotationRate.y, m.rotationRate.z, m.attitude.pitch, m.attitude.roll, m.attitude.yaw,
+      m.gravity.x, m.gravity.y, m.gravity.z, q.w, q.x, q.y, q.z,
+    ])
+  }
+
+  /// Caller holds `lock` (or is a test).
+  func append(_ s: Sample) {
+    samples.append(s)
+    lastSampleUptime = s.t
+    if samples.count > 7_000 { samples.removeFirst(samples.count - 6_000) }
   }
 
   /// Called by the capture engine with the host time of the first sample written to `url`.
@@ -57,14 +74,18 @@ final class SubvoxCapture: @unchecked Sendable {
   }
 
   /// Copies the clip and writes the session. Runs off the main thread; failures only log.
-  func saveSession(audioURL: URL, text: String, model: String, sourceApp: String?) {
-    let (start, wordList, motion) = lock.withLock { () -> (TimeInterval?, [Word]?, [CMDeviceMotion]) in
+  @discardableResult
+  func saveSession(audioURL: URL, text: String, model: String, sourceApp: String?) -> URL? {
+    let (start, wordList, motion) = lock.withLock { () -> (TimeInterval?, [Word]?, [Sample]) in
       defer { audioStart[audioURL] = nil; words[audioURL] = nil }
       return (audioStart[audioURL], words[audioURL], samples)
     }
-    guard let start else { return log.notice("No audio start time for \(audioURL.lastPathComponent, privacy: .public); not saving") }
+    guard let start else {
+      log.notice("No audio start time for \(audioURL.lastPathComponent, privacy: .public); not saving")
+      return nil
+    }
     let duration = (try? AVAudioFile(forReading: audioURL)).map { Double($0.length) / $0.processingFormat.sampleRate } ?? 0
-    let clip = motion.filter { $0.timestamp >= start - 1 && $0.timestamp <= start + duration + 1 }
+    let clip = motion.filter { $0.t >= start - 1 && $0.t <= start + duration + 1 }
 
     let stamp = Date().formatted(.iso8601.year().month().day().time(includingFractionalSeconds: true))
       .replacingOccurrences(of: ":", with: "").replacingOccurrences(of: ".", with: "-")
@@ -73,12 +94,8 @@ final class SubvoxCapture: @unchecked Sendable {
       try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
       try FileManager.default.copyItem(at: audioURL, to: dir.appending(path: "audio.wav"))
       var csv = "t,ax,ay,az,rx,ry,rz,pitch,roll,yaw,gx,gy,gz,qw,qx,qy,qz\n"
-      for m in clip {
-        let q = m.attitude.quaternion
-        csv += [m.timestamp - start, m.userAcceleration.x, m.userAcceleration.y, m.userAcceleration.z,
-                m.rotationRate.x, m.rotationRate.y, m.rotationRate.z, m.attitude.pitch, m.attitude.roll, m.attitude.yaw,
-                m.gravity.x, m.gravity.y, m.gravity.z, q.w, q.x, q.y, q.z]
-          .map { String(format: "%.6f", $0) }.joined(separator: ",") + "\n"
+      for s in clip {
+        csv += ([s.t - start] + s.values).map { String(format: "%.6f", $0) }.joined(separator: ",") + "\n"
       }
       try csv.write(to: dir.appending(path: "motion.csv"), atomically: true, encoding: .utf8)
       let wordsJSON: [String: Any] = [
@@ -105,8 +122,10 @@ final class SubvoxCapture: @unchecked Sendable {
       try JSONSerialization.data(withJSONObject: meta, options: [.prettyPrinted, .sortedKeys]).write(to: dir.appending(path: "meta.json"))
       lock.withLock { sessionsSaved += 1 }
       log.notice("Saved Subvox session \(dir.lastPathComponent, privacy: .public) motion=\(clip.count, privacy: .public) words=\(wordList?.count ?? -1, privacy: .public)")
+      return dir
     } catch {
       log.error("Failed to save Subvox session: \(error.localizedDescription, privacy: .public)")
+      return nil
     }
   }
 
